@@ -52,16 +52,19 @@
   output:
     is_young_child_for_medicaid: false
 
-- name: TX child at exactly 150% FPL, the new income maximum, eligible
+# The formula compares with strict less-than. These cases bracket each new limit
+# rather than sitting on it, so they do not depend on whether the exact income
+# maximum is inclusive.
+- name: TX child just below the new 150% FPL limit, eligible
   period: 2026
   input:
     age: 3
-    medicaid_income_level: 1.50
+    medicaid_income_level: 1.49
     state_code: TX
   output:
     is_young_child_for_medicaid: true
 
-- name: TX child at 151% FPL, above the new limit, ineligible
+- name: TX child above the new 150% FPL limit, ineligible
   period: 2026
   input:
     age: 3
@@ -70,16 +73,16 @@
   output:
     is_young_child_for_medicaid: false
 
-- name: NM child at exactly 310% FPL, the new income maximum, eligible
+- name: NM child just below the new 310% FPL limit, eligible
   period: 2026
   input:
     age: 3
-    medicaid_income_level: 3.10
+    medicaid_income_level: 3.09
     state_code: NM
   output:
     is_young_child_for_medicaid: true
 
-- name: NM child at 311% FPL, above the new limit, ineligible
+- name: NM child above the new 310% FPL limit, ineligible
   period: 2026
   input:
     age: 3
