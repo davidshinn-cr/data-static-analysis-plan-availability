@@ -85,6 +85,11 @@ reviews:
         boundary cases on both sides of any changed threshold are covered.
 
   pre_merge_checks:
+    # This repository is policy data, not a library. Docstring coverage is not a
+    # meaningful signal here and would fire on every data PR.
+    docstrings:
+      mode: off
+
     issue_assessment:
       mode: error
 
