@@ -51,3 +51,39 @@
     state_code: MO
   output:
     is_young_child_for_medicaid: false
+
+- name: TX child at exactly 150% FPL, the new income maximum, eligible
+  period: 2026
+  input:
+    age: 3
+    medicaid_income_level: 1.50
+    state_code: TX
+  output:
+    is_young_child_for_medicaid: true
+
+- name: TX child at 151% FPL, above the new limit, ineligible
+  period: 2026
+  input:
+    age: 3
+    medicaid_income_level: 1.51
+    state_code: TX
+  output:
+    is_young_child_for_medicaid: false
+
+- name: NM child at exactly 310% FPL, the new income maximum, eligible
+  period: 2026
+  input:
+    age: 3
+    medicaid_income_level: 3.10
+    state_code: NM
+  output:
+    is_young_child_for_medicaid: true
+
+- name: NM child at 311% FPL, above the new limit, ineligible
+  period: 2026
+  input:
+    age: 3
+    medicaid_income_level: 3.11
+    state_code: NM
+  output:
+    is_young_child_for_medicaid: false
