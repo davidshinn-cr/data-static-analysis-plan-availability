@@ -1,0 +1,146 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: en-US
+early_access: true
+
+tone_instructions: >-
+  In this repository the business logic lives in the data. A parameter file is
+  production behavior. Review data diffs as behavior changes, never as content
+  updates.
+
+reviews:
+  profile: chill
+  request_changes_workflow: true
+  high_level_summary: true
+  high_level_summary_instructions: >-
+    When the diff touches anything under policyengine_us/parameters/, open the
+    summary with a "Data change impact" section listing every state code whose
+    value changed with old -> new values, every effective date added or moved,
+    and the programs and variables whose output changes as a result.
+  sequence_diagrams: true
+  assess_linked_issues: true
+  related_issues: true
+  estimate_code_review_effort: true
+
+  auto_review:
+    enabled: true
+    drafts: false
+
+  path_instructions:
+    - path: "policyengine_us/parameters/**"
+      instructions: |
+        These YAML files are the policy database. They are keyed by an entity
+        (most often a two-letter `state_code`, per `metadata.breakdown`) and by
+        an effective date, and they are read at runtime by variables under
+        `policyengine_us/variables/**`. Changing a number here changes who is
+        eligible for what. Review it as a behavior change.
+
+        For every changed parameter file:
+
+        1. Enumerate the changes precisely. List every state code (or other
+           breakdown key) whose value changed, as `KEY: old -> new`, and every
+           effective date that was added, removed, or moved. Never describe a
+           parameter diff as "updated values" without naming the keys.
+
+        2. Check scope against the requirement. Read the linked issue for this
+           PR. If the diff changes a state code, a breakdown key, or an
+           effective date that the requirement does not explicitly name, flag it
+           as an UNINTENDED SCOPE CHANGE and treat it as high priority. A
+           neighbouring state left edited by accident is the classic failure
+           mode in a state-keyed data file and it is invisible in CI. Do not
+           excuse it because the value looks plausible.
+
+        3. Trace the impact. Find the variables that read this parameter path
+           (search `policyengine_us/variables/**` for the dotted path). Name
+           them, and name the programs whose output moves. Say explicitly when
+           the change also re-routes households into or out of a *different*
+           program, since that is a cross-component effect a reader will not
+           see in the diff. Determine which programs those are yourself.
+
+        4. Quantify the affected band. State precisely which households
+           change status: name the breakdown key, the numeric band, and the
+           direction of the change (does this population gain or lose
+           eligibility?). Derive the band from the old and new values; be
+           exact about whether the boundary value itself is included.
+
+        5. Check test coverage. Look for matching cases under
+           `policyengine_us/tests/policy/baseline/**`. If the changed band has
+           no test at the new boundary, say so and propose the specific case.
+           A data change with no test is how a wrong number reaches production.
+
+        6. Check the effective date. A value with the wrong start date silently
+           rewrites history for prior years. Confirm the date matches the
+           requirement.
+
+    - path: "policyengine_us/variables/**"
+      instructions: |
+        These are the consumers of the parameter data. When one changes, state
+        which parameter paths it now reads or stops reading, and whether the
+        existing YAML under `policyengine_us/parameters/**` still satisfies the
+        access pattern for every breakdown key (all states, all dates).
+
+    - path: "policyengine_us/tests/policy/baseline/**"
+      instructions: |
+        Baseline tests pin program behavior. When expected values move, confirm
+        the parameter or logic change that justifies each one, and confirm the
+        boundary cases on both sides of any changed threshold are covered.
+
+  pre_merge_checks:
+    issue_assessment:
+      mode: error
+
+    custom_checks:
+      - name: Data change scope matches the requirement
+        mode: error
+        instructions: |
+          This check applies only when the diff touches files under
+          `policyengine_us/parameters/`.
+
+          PASS only if both of the following hold:
+          1. Every breakdown key modified by the diff (state code, county,
+             filing status, or other key under `metadata.breakdown`) is named in
+             the linked issue or the PR description.
+          2. Every effective date added, removed, or changed by the diff is
+             named in the linked issue or the PR description.
+
+          FAIL, listing the specific out-of-scope keys and dates, if the diff
+          reaches any key or date the stated requirement does not cover.
+
+          If no issue is linked and the PR description does not state the
+          intended scope, FAIL and say that the scope of a data change cannot be
+          verified without a stated requirement.
+
+      - name: Data change is covered by a boundary test
+        mode: warning
+        instructions: |
+          This check applies only when the diff changes a numeric value under
+          `policyengine_us/parameters/`.
+
+          PASS if the diff also adds or updates a case under
+          `policyengine_us/tests/policy/baseline/**` that exercises the new
+          value at its boundary for the affected breakdown key.
+
+          FAIL if a threshold moves with no test at the new boundary, naming the
+          parameter and the key that is untested.
+
+knowledge_base:
+  opt_out: false
+  learnings:
+    # `auto` resolves to organization-wide learnings for private repos, which
+    # would pull in learnings from the other demo repos. `local` pins them here
+    # so the demo is reproducible.
+    scope: local
+  issues:
+    scope: auto
+  jira:
+    usage: auto
+  pull_requests:
+    scope: auto
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - "AGENTS.md"
+      - "CLAUDE.md"
+      - "CONTRIBUTING.md"
+  # Cross-service impact: list the repos that consume this data (for PolicyEngine,
+  # the API and app layers) so a data change here is assessed against them too.
+  linked_repositories: []

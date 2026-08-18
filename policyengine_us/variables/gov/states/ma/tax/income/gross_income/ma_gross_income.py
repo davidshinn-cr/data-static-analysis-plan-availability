@@ -1,0 +1,22 @@
+from policyengine_us.model_api import *
+
+
+class ma_gross_income(Variable):
+    value_type = float
+    entity = TaxUnit
+    label = "MA gross income"
+    unit = USD
+    definition_period = YEAR
+    reference = "https://www.mass.gov/info-details/mass-general-laws-c62-ss-2"
+    defined_for = StateCode.MA
+
+    def formula(tax_unit, period, parameters):
+        # MA Form 1, Line 10: Total 5.0% income (lines 3-10).
+        federal_gross_income = add(tax_unit, period, ["irs_gross_income"])
+        # Add back lines 6/7 losses dropped by irs_gross_income.
+        loss_adjustment = tax_unit("ma_gross_income_loss_adjustment", period)
+        # Exclude foreign earned income and Social Security.
+        foreign_earned_income = tax_unit("foreign_earned_income_exclusion", period)
+        social_security_in_agi = add(tax_unit, period, ["taxable_social_security"])
+        deductions = foreign_earned_income + social_security_in_agi
+        return max_(0, federal_gross_income + loss_adjustment - deductions)

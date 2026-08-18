@@ -1,0 +1,201 @@
+- name: IL exact 2024 Medicaid cutoff does not create CHIP child eligibility
+  period: 2024
+  input:
+    people:
+      head:
+        age: 10
+        immigration_status: CITIZEN
+        is_medicaid_eligible: False
+        medicaid_income_level: 3.18
+    households:
+      household:
+        state_code: IL
+        members: [head]
+  output:
+    is_chip_eligible_child: False
+
+- name: NC exact 2024 Medicaid cutoff does not create CHIP child eligibility
+  period: 2024
+  input:
+    people:
+      head:
+        age: 10
+        immigration_status: CITIZEN
+        is_medicaid_eligible: False
+        medicaid_income_level: 2.16
+    households:
+      household:
+        state_code: NC
+        members: [head]
+  output:
+    is_chip_eligible_child: False
+
+- name: TX child without ESI qualifies for CHIP
+  period: 2023
+  input:
+    people:
+      head:
+        age: 10
+        immigration_status: CITIZEN
+        is_medicaid_eligible: False
+        medicaid_income_level: 2.0
+        has_esi: False
+    households:
+      household:
+        state_code: TX
+        members: [head]
+  output:
+    is_chip_eligible_child: True
+
+- name: TX child with ESI is not eligible for CHIP
+  period: 2023
+  input:
+    people:
+      head:
+        age: 10
+        immigration_status: CITIZEN
+        is_medicaid_eligible: False
+        medicaid_income_level: 2.0
+        has_esi: True
+    households:
+      household:
+        state_code: TX
+        members: [head]
+  output:
+    is_chip_eligible_child: False
+
+- name: TX adult is not a CHIP-eligible child
+  period: 2023
+  input:
+    people:
+      head:
+        age: 20
+        immigration_status: CITIZEN
+        is_medicaid_eligible: False
+        medicaid_income_level: 2.0
+        has_esi: False
+    households:
+      household:
+        state_code: TX
+        members: [head]
+  output:
+    is_chip_eligible_child: False
+
+- name: TX Medicaid-eligible child is not CHIP-eligible
+  period: 2023
+  input:
+    people:
+      head:
+        age: 10
+        immigration_status: CITIZEN
+        is_medicaid_eligible: True
+        medicaid_income_level: 1.0
+        has_esi: False
+    households:
+      household:
+        state_code: TX
+        members: [head]
+  output:
+    is_chip_eligible_child: False
+
+- name: TX child with direct-purchase coverage is not CHIP-eligible
+  period: 2023
+  input:
+    people:
+      head:
+        age: 10
+        immigration_status: CITIZEN
+        is_medicaid_eligible: False
+        medicaid_income_level: 2.0
+        has_non_marketplace_direct_purchase_health_coverage_at_interview: True
+    households:
+      household:
+        state_code: TX
+        members: [head]
+  output:
+    is_chip_eligible_child: False
+
+- name: TX child with VA health coverage is not CHIP-eligible
+  period: 2023
+  input:
+    people:
+      head:
+        age: 10
+        immigration_status: CITIZEN
+        is_medicaid_eligible: False
+        medicaid_income_level: 2.0
+        has_va_health_coverage_at_interview: True
+    households:
+      household:
+        state_code: TX
+        members: [head]
+  output:
+    is_chip_eligible_child: False
+
+- name: TX child receiving Medicaid is not CHIP-eligible
+  period: 2023
+  input:
+    people:
+      head:
+        age: 10
+        immigration_status: CITIZEN
+        is_medicaid_eligible: False
+        medicaid_income_level: 2.0
+        receives_medicaid: True
+    households:
+      household:
+        state_code: TX
+        members: [head]
+  output:
+    has_chip_disqualifying_health_coverage: True
+    is_chip_eligible_child: False
+
+- name: MO child at 154% FPL is not Medicaid-eligible and routes to CHIP
+  period: 2026
+  input:
+    people:
+      head:
+        age: 8
+        immigration_status: CITIZEN
+        medicaid_income_level: 1.54
+    households:
+      household:
+        state_code: MO
+        members: [head]
+  output:
+    is_medicaid_eligible: false
+    is_chip_eligible_child: true
+
+- name: MO child at 152% FPL is Medicaid-eligible and does not route to CHIP
+  period: 2026
+  input:
+    people:
+      head:
+        age: 8
+        immigration_status: CITIZEN
+        medicaid_income_level: 1.52
+    households:
+      household:
+        state_code: MO
+        members: [head]
+  output:
+    is_medicaid_eligible: true
+    is_chip_eligible_child: false
+
+- name: TX child with partner-reported health coverage other than CHIP is not CHIP-eligible
+  period: 2023
+  input:
+    people:
+      head:
+        age: 10
+        immigration_status: CITIZEN
+        is_medicaid_eligible: False
+        medicaid_income_level: 2.0
+        has_health_coverage_other_than_chip: True
+    households:
+      household:
+        state_code: TX
+        members: [head]
+  output:
+    has_chip_disqualifying_health_coverage: True
+    is_chip_eligible_child: False
