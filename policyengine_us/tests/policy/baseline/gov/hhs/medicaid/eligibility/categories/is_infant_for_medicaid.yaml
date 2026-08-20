@@ -79,3 +79,50 @@
     medicaid_income_level: 2.21
   output:
     is_infant_for_medicaid: false
+
+# Texas raises the infant ceiling from 203% to 210% FPG effective 2026-01-01.
+- name: Infant at exactly 203% FPL in 2025, the pre-2026 ceiling, eligible in TX
+  period: 2025
+  input:
+    state_code: TX
+    age: 0
+    medicaid_income_level: 2.03
+  output:
+    is_infant_for_medicaid: true
+
+- name: Infant at 204% FPL in 2025, above the pre-2026 ceiling, ineligible in TX
+  period: 2025
+  input:
+    state_code: TX
+    age: 0
+    medicaid_income_level: 2.04
+  output:
+    is_infant_for_medicaid: false
+
+- name: Infant at 204% FPL in 2026, inside the newly covered band, eligible in TX
+  period: 2026
+  input:
+    state_code: TX
+    age: 0
+    medicaid_income_level: 2.04
+  output:
+    is_infant_for_medicaid: true
+
+# The infant formula admits the boundary explicitly (np.isclose | <=).
+- name: Infant at exactly 210% FPL in 2026, the new income maximum, eligible in TX
+  period: 2026
+  input:
+    state_code: TX
+    age: 0
+    medicaid_income_level: 2.10
+  output:
+    is_infant_for_medicaid: true
+
+- name: Infant at 211% FPL in 2026, above the new ceiling, ineligible in TX
+  period: 2026
+  input:
+    state_code: TX
+    age: 0
+    medicaid_income_level: 2.11
+  output:
+    is_infant_for_medicaid: false

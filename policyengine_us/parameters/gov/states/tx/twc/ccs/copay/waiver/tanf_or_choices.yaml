@@ -1,0 +1,18 @@
+description: Texas uses this indicator to determine whether families receiving TANF or participating in Choices are exempt from the Parent Share of Cost under the Child Care Services program.
+# 40 TAC 809.19(d): a Board shall not assess a Parent Share of Cost to a family
+# receiving TANF or participating in Choices, the TANF employment programme.
+# The is_tanf_enrolled input drives this; Choices participation is not tracked
+# separately at the moment, so a Choices participant who is not currently
+# receiving TANF is not exempted here.
+values:
+  2024-10-01: true
+
+metadata:
+  unit: bool
+  period: month
+  label: Texas CCS TANF and Choices copayment waiver
+  reference:
+    - title: 40 TAC §809.19 - Parent Share of Cost
+      href: https://www.law.cornell.edu/regulations/texas/40-Tex-Admin-Code-SS-809-19
+    - title: 40 TAC §809.48 - Choices child care
+      href: https://www.law.cornell.edu/regulations/texas/40-Tex-Admin-Code-SS-809-48

@@ -1,0 +1,71 @@
+# 40 TAC 809.19(d): a Board may not assess a Parent Share of Cost to a family
+# whose child receives protective services child care, or to a family receiving
+# TANF or participating in Choices.
+
+- name: Case 1, protective services child care waives the Parent Share of Cost.
+  period: 2025-01
+  input:
+    people:
+      person1:
+        age: 30
+        employment_income: 30_000
+      person2:
+        age: 4
+        is_disabled: false
+        is_citizen_or_legal_immigrant: true
+    spm_units:
+      spm_unit:
+        members: [person1, person2]
+        spm_unit_size: 2
+        receives_tx_ccs_protective_services: true
+    households:
+      household:
+        members: [person1, person2]
+        state_code: TX
+  output:
+    tx_ccs_copay_waived: true
+
+- name: Case 2, a TANF family is exempt from the Parent Share of Cost.
+  period: 2025-01
+  input:
+    people:
+      person1:
+        age: 30
+        employment_income: 30_000
+      person2:
+        age: 4
+        is_disabled: false
+        is_citizen_or_legal_immigrant: true
+    spm_units:
+      spm_unit:
+        members: [person1, person2]
+        spm_unit_size: 2
+        is_tanf_enrolled: true
+    households:
+      household:
+        members: [person1, person2]
+        state_code: TX
+  output:
+    tx_ccs_copay_waived: true
+
+- name: Case 3, a family in neither exempt group is assessed the Parent Share of Cost.
+  period: 2025-01
+  input:
+    people:
+      person1:
+        age: 30
+        employment_income: 30_000
+      person2:
+        age: 4
+        is_disabled: false
+        is_citizen_or_legal_immigrant: true
+    spm_units:
+      spm_unit:
+        members: [person1, person2]
+        spm_unit_size: 2
+    households:
+      household:
+        members: [person1, person2]
+        state_code: TX
+  output:
+    tx_ccs_copay_waived: false

@@ -137,3 +137,36 @@
         state_code: TX
   output:
     tx_ccs: 0  # Not eligible for CCS
+
+- name: Case 2 family with a protective services referral keeps the full reimbursement
+  period: 2025-01
+  absolute_error_margin: 0.1
+  input:
+    people:
+      parent1:
+        age: 35
+        employment_income: 30_000  # Annual income ($2,500/month, ~35% SMI)
+      parent2:
+        age: 32
+      child1:
+        age: 4
+        is_disabled: false
+        is_citizen_or_legal_immigrant: true
+        childcare_attending_days_per_month: 10
+    spm_units:
+      spm_unit:
+        members: [parent1, parent2, child1]
+        spm_unit_size: 3
+        spm_unit_pre_subsidy_childcare_expenses: 6_000  # Annual ($500/month)
+        receives_tx_ccs_protective_services: true
+    households:
+      household:
+        members: [parent1, parent2, child1]
+        state_code: TX
+        county: DALLAS_COUNTY_TX
+  output:
+    # Same family as Case 2, where the ~$105.95 copay reduced the benefit to
+    # $310.03. Under 40 TAC 809.19(d) the copay is waived, so the whole capped
+    # expense of $415.98 flows through.
+    tx_ccs_copay: 0
+    tx_ccs: 415.98

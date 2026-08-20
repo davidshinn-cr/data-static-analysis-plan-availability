@@ -13,6 +13,12 @@ class tx_ccs_copay(Variable):
     def formula(spm_unit, period, parameters):
         p = parameters(period).gov.states.tx.twc.ccs.copay.rate
 
+        # 40 TAC 809.19(d): protective services, TANF and Choices families are
+        # not assessed a Parent Share of Cost at all. The sliding scale below
+        # never reaches zero on its own -- its lowest bracket starts at 1% SMI
+        # -- so the waiver has to short-circuit it rather than fall out of it.
+        waived = spm_unit("tx_ccs_copay_waived", period)
+
         income = spm_unit("tx_ccs_countable_income", period)
         smi = spm_unit("hhs_smi", period)
         smi_ratio = where(smi > 0, income / smi, 0)
@@ -47,4 +53,4 @@ class tx_ccs_copay(Variable):
 
         # Total rate capped at maximum, then applied to income.
         total_rate = min_(first_child_rate + additional_child_rate, max_rate)
-        return total_rate * income
+        return where(waived, 0, total_rate * income)
