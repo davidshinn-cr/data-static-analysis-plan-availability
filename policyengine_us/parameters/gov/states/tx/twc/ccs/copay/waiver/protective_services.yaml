@@ -1,0 +1,16 @@
+description: Texas uses this indicator to determine whether protective services child care is exempt from the Parent Share of Cost under the Child Care Services program.
+# 40 TAC 809.19(d): a Board shall not assess a Parent Share of Cost to a family
+# whose child is receiving protective services child care, because that care is
+# authorized by DFPS rather than requested by the family. The referral is not
+# derivable from any other modelled input, so it enters through the
+# receives_tx_ccs_protective_services input variable.
+values:
+  2024-10-01: true
+
+metadata:
+  unit: bool
+  period: month
+  label: Texas CCS protective services copayment waiver
+  reference:
+    - title: 40 TAC §809.19 - Parent Share of Cost
+      href: https://www.law.cornell.edu/regulations/texas/40-Tex-Admin-Code-SS-809-19
