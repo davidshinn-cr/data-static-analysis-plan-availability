@@ -1,0 +1,46 @@
+description: New Mexico charges this share of monthly countable income as the first child's copayment under the Child Care Assistance Program.
+# The published schedule (8.15.2.24 NMAC) is a sliding scale on the family's
+# income measured against the federal poverty guideline. Families at or below
+# 200% FPG pay nothing (fpl_floor); above that the first child's copay rises in
+# steps to the 7% federal affordability benchmark for families at or above 400%
+# FPG (45 CFR 98.45(b)(5)).
+#
+# The bracket amounts are shares of MONTHLY countable income, so the copay
+# tracks income within a band rather than jumping only at band edges.
+metadata:
+  type: single_amount
+  threshold_unit: /1
+  amount_unit: /1
+  period: month
+  label: New Mexico CCAP copayment rate
+  reference:
+    - title: 8.15.2.24 NMAC (annually published copayment schedule)
+      href: https://www.srca.nm.gov/parts/title08/08.015.0002.html
+    - title: 45 CFR 98.45(b)(5) (7% of family income affordability benchmark)
+      href: https://www.law.cornell.edu/cfr/text/45/98.45
+
+brackets:
+  - threshold:
+      2023-07-01: 0
+    amount:
+      2023-07-01: 0
+  - threshold:
+      2023-07-01: 2
+    amount:
+      2023-07-01: 0.02
+  - threshold:
+      2023-07-01: 2.5
+    amount:
+      2023-07-01: 0.035
+  - threshold:
+      2023-07-01: 3
+    amount:
+      2023-07-01: 0.05
+  - threshold:
+      2023-07-01: 3.5
+    amount:
+      2023-07-01: 0.06
+  - threshold:
+      2023-07-01: 4
+    amount:
+      2023-07-01: 0.07

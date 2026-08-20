@@ -1,0 +1,24 @@
+description: New Mexico uses this indicator to determine whether the published copayment schedule applies under the Child Care Assistance Program.
+# Three copay eras (LFC Policy Brief, Dec 9 2025, p.2):
+#   before 2022-05-01: the pre-2022 copay formula (8.15.2.13.B) is not modeled,
+#                      so no schedule applies and the copay stays $0;
+#   2022-05-01 to 2023-06-30: all copays waived (copay/waived.yaml is true);
+#   2023-07-01 onward: copays reinstated for families above 200% FPG under the
+#                      annually published schedule (8.15.2.24 NMAC), which this
+#                      subtree now encodes.
+# This flag is the boundary between "no schedule exists in the model" and "the
+# schedule applies"; copay/waived.yaml still short-circuits it to $0 in the
+# waiver windows, including Universal Child Care from 2025-11-01.
+values:
+  2016-10-01: false
+  2023-07-01: true
+
+metadata:
+  unit: bool
+  period: month
+  label: New Mexico CCAP copayment schedule in effect
+  reference:
+    - title: 8.15.2.24 NMAC (annually published copayment schedule)
+      href: https://www.srca.nm.gov/parts/title08/08.015.0002.html
+    - title: LFC Policy Brief, New Mexico Childcare Assistance Eligibility Changes (Dec 9 2025), p.2 (copay waiver expired 2023-07-01 for >200% FPL)
+      href: https://www.nmlegis.gov/handouts/ALFC%20120825%20Item%208%20Policy%20Brief%20Child%20Care%20Update.pdf#page=2

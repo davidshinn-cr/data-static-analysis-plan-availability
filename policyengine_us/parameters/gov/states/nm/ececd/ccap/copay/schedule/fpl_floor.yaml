@@ -1,0 +1,17 @@
+description: New Mexico charges no copayment to families at or below this percentage of the federal poverty guideline under the Child Care Assistance Program.
+# When the copay waiver expired on 2023-07-01, copays were reinstated only for
+# families ABOVE 200% FPG; families at or below 200% FPG remained at $0. The
+# comparison is inclusive of the floor itself: a family exactly at 200% FPG
+# pays nothing.
+values:
+  2023-07-01: 2
+
+metadata:
+  unit: /1
+  period: month
+  label: New Mexico CCAP copayment floor
+  reference:
+    - title: LFC Policy Brief, New Mexico Childcare Assistance Eligibility Changes (Dec 9 2025), p.2 (families at or below 200% FPL remained at $0)
+      href: https://www.nmlegis.gov/handouts/ALFC%20120825%20Item%208%20Policy%20Brief%20Child%20Care%20Update.pdf#page=2
+    - title: 8.15.2.24 NMAC
+      href: https://www.srca.nm.gov/parts/title08/08.015.0002.html

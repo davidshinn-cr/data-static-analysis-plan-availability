@@ -1,0 +1,16 @@
+description: New Mexico caps the total monthly family copayment at this amount under the Child Care Assistance Program.
+# The schedule carries a per-family monthly ceiling so that a large family at
+# the top of the sliding scale does not owe more than the cap. The ceiling binds
+# only in the 2023-07-01 to 2025-10-31 window, since the operative continuation
+# ceiling of 425% FPG is the highest income a paying family can have; from
+# 2025-11-01 Universal Child Care waives every copay.
+values:
+  2023-07-01: 600
+
+metadata:
+  unit: currency-USD
+  period: month
+  label: New Mexico CCAP maximum monthly copayment
+  reference:
+    - title: 8.15.2.24 NMAC (annually published copayment schedule)
+      href: https://www.srca.nm.gov/parts/title08/08.015.0002.html

@@ -1,0 +1,16 @@
+description: New Mexico uses this indicator to determine whether families receiving TANF are exempt from the copayment under the Child Care Assistance Program.
+# 8.15.2.9 Priority 1/2: families receiving or transitioning off TANF are served
+# ahead of other applicants and are not charged a copayment. The same
+# is_tanf_enrolled input that bypasses the income test in
+# nm_ccap_income_eligible drives this exemption, so a TANF family that is
+# categorically income-eligible is also categorically copay-exempt.
+values:
+  2023-07-01: true
+
+metadata:
+  unit: bool
+  period: month
+  label: New Mexico CCAP TANF copayment exemption
+  reference:
+    - title: 8.15.2.9 NMAC (TANF priority groups)
+      href: https://www.srca.nm.gov/parts/title08/08.015.0002.html

@@ -6,10 +6,11 @@ description: New Mexico uses this indicator to determine whether child care assi
 #   2025-11-01: Universal Child Care -- no copays for anyone.
 # This flag is true only when copays are fully waived for every family (the
 # 2022-05-01 to 2023-06-30 and 2025-11-01-onward windows). In the interim
-# window it is false, but PolicyEngine still returns a $0 copay there because
-# the reinstated >200% FPL copay uses the annually published copay schedule
-# (8.15.2.24) that is not encoded, and the pre-2022 copay formula (8.15.2.13.B)
-# is likewise not modeled -- see nm_ccap_copay for the documented approximation.
+# window it is false and the reinstated >200% FPG copay is computed from the
+# published schedule (8.15.2.24), now encoded under copay/schedule/. Before
+# 2022-05-01 the flag is also false, but the pre-2022 copay formula
+# (8.15.2.13.B) is still not modeled, so copay/schedule/in_effect.yaml holds
+# that era at $0 -- see nm_ccap_copay.
 values:
   2016-10-01: false
   2022-05-01: true

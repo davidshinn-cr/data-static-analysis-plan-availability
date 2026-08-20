@@ -1,0 +1,15 @@
+description: New Mexico adds this share of the first child's copayment for each additional child in care under the Child Care Assistance Program.
+# The schedule prices the first child in care at the full sliding-scale rate and
+# each additional child at half that amount. "In care" means an age-eligible
+# child with childcare hours, not simply an age-eligible child in the household
+# -- see nm_ccap_scheduled_copay.
+values:
+  2023-07-01: 0.5
+
+metadata:
+  unit: /1
+  period: month
+  label: New Mexico CCAP additional child copayment share
+  reference:
+    - title: 8.15.2.24 NMAC (annually published copayment schedule)
+      href: https://www.srca.nm.gov/parts/title08/08.015.0002.html
