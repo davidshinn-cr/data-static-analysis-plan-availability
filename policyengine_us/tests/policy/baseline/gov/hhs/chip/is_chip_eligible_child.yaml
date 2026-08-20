@@ -199,3 +199,44 @@
   output:
     has_chip_disqualifying_health_coverage: True
     is_chip_eligible_child: False
+
+# The Texas young-child Medicaid ceiling rises from 149% to 155% FPG on
+# 2026-01-01. Texas CHIP covers children up to 206% FPG but only those who are
+# NOT Medicaid eligible, so raising the Medicaid ceiling moves the 149%-155%
+# band out of CHIP and into Medicaid. is_medicaid_eligible is left to compute
+# here rather than being supplied as an input, so the reroute is exercised end
+# to end.
+- name: TX young child at 152% FPL in 2025 is above the Medicaid ceiling and lands in CHIP
+  period: 2025
+  input:
+    people:
+      head:
+        age: 3
+        immigration_status: CITIZEN
+        medicaid_income_level: 1.52
+        has_esi: False
+    households:
+      household:
+        state_code: TX
+        members: [head]
+  output:
+    is_medicaid_eligible: False
+    is_chip_eligible_child: True
+
+- name: TX young child at 152% FPL in 2026 becomes Medicaid eligible and leaves CHIP
+  period: 2026
+  input:
+    people:
+      head:
+        age: 3
+        immigration_status: CITIZEN
+        medicaid_income_level: 1.52
+        has_esi: False
+    households:
+      household:
+        state_code: TX
+        members: [head]
+  output:
+    # Same household, same income: the 2026-01-01 ceiling increase reroutes it.
+    is_medicaid_eligible: True
+    is_chip_eligible_child: False
