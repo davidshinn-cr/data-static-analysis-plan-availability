@@ -1,12 +1,18 @@
-# NM CCAP copayment (8.15.2.13 NMAC; ECECD Co-payments Waived flyer; LFC brief).
-# The copay is $0 for every modeled period, but for different reasons across
-# eras (LFC Policy Brief, Dec 9 2025, p.2):
+# NM CCAP copayment (8.15.2.13 / 8.15.2.24 NMAC; ECECD Co-payments Waived
+# flyer; LFC brief). Three eras (LFC Policy Brief, Dec 9 2025, p.2):
+#   - before 2022-05-01: the pre-2022 copay formula (8.15.2.13.B) is not
+#     modeled, so copay/schedule/in_effect is false -> $0;
 #   - 2022-05-01 to 2023-06-30 and 2025-11-01 onward: all copays waived -> $0;
-#   - 2023-07-01 to 2025-10-31: copays reinstated only for families above 200%
-#     FPL, using an unencoded published schedule (8.15.2.24), APPROXIMATED as $0;
-#   - before 2022-05-01: the pre-2022 copay formula (8.15.2.13.B) is not modeled -> $0.
+#   - 2023-07-01 to 2025-10-31: copays reinstated for families ABOVE 200% FPG
+#     under the published schedule, now encoded under copay/schedule/.
+# The copay is only defined for CCAP-eligible families; a family that fails the
+# activity, asset, child, or income test reads $0.
+#
+# 2025 FPG (CONTIGUOUS_US): family of 2 = 21_150/yr (1_762.50/month),
+# family of 3 = 26_650/yr (2_220.83/month).
+# 2024 FPG: family of 2 = 20_440/yr. 2023: 19_720/yr. 2021: 17_420/yr.
 
-- name: Case 1, copay is zero during the 2023-07 partial reinstatement window.
+- name: Case 1, copay is zero below the 200 percent floor in the reinstatement window.
   period: 2025-01
   absolute_error_margin: 0.01
   input:
@@ -14,9 +20,13 @@
       person1:
         age: 30
         employment_income: 30_000
+        weekly_hours_worked: 40
+        immigration_status: CITIZEN
       person2:
         age: 3
         is_tax_unit_dependent: true
+        immigration_status: CITIZEN
+        childcare_hours_per_week: 40
     spm_units:
       spm_unit:
         members: [person1, person2]
@@ -25,21 +35,26 @@
         members: [person1, person2]
         state_code: NM
   output:
-    # 2025-01 is in the 2023-07-01 partial-reinstatement window (waived = false);
-    # the >200% FPL copay uses an unencoded schedule, approximated as $0.
+    # 2025-01 is in the 2023-07-01 reinstatement window (waived = false), but
+    # 30_000/yr is 142% of the guideline, at or below the 200% floor -> $0.
     nm_ccap_copay: 0
 
-- name: Case 2, copay is zero even for a higher income family in the reinstatement window.
+- name: Case 2, copay is zero just under the floor in the reinstatement window.
   period: 2024-01
   absolute_error_margin: 0.01
   input:
     people:
       person1:
         age: 35
+        # 40_000/yr against the 2024 family-of-2 guideline of 20_440 is 196%.
         employment_income: 40_000
+        weekly_hours_worked: 40
+        immigration_status: CITIZEN
       person2:
         age: 5
         is_tax_unit_dependent: true
+        immigration_status: CITIZEN
+        childcare_hours_per_week: 40
     spm_units:
       spm_unit:
         members: [person1, person2]
@@ -50,7 +65,7 @@
   output:
     nm_ccap_copay: 0
 
-- name: Case 3, copay is zero before the waiver because the formula is deferred.
+- name: Case 3, copay is zero before the waiver because the schedule is not in effect.
   period: 2021-01
   absolute_error_margin: 0.01
   input:
@@ -58,9 +73,13 @@
       person1:
         age: 32
         employment_income: 30_000
+        weekly_hours_worked: 40
+        immigration_status: CITIZEN
       person2:
         age: 4
         is_tax_unit_dependent: true
+        immigration_status: CITIZEN
+        childcare_hours_per_week: 40
     spm_units:
       spm_unit:
         members: [person1, person2]
@@ -69,12 +88,12 @@
         members: [person1, person2]
         state_code: NM
   output:
-    # Pre-2022 era: the waiver is not yet in effect (waived = false), but the
-    # pre-2022 copay formula (8.15.2.13.B) is not modeled, so the copay is
-    # still $0.
+    # Pre-2022 era: the waiver is not in effect (waived = false) and the family
+    # is above 200% of the 2021 guideline (17_420), but the pre-2022 copay
+    # formula (8.15.2.13.B) is not modeled, so schedule.in_effect is false -> $0.
     nm_ccap_copay: 0
 
-- name: Case 4, copay is zero in the full-waiver window before the 2023-07 reinstatement.
+- name: Case 4, copay is zero in the full waiver window before the 2023-07 reinstatement.
   period: 2023-01
   absolute_error_margin: 0.01
   input:
@@ -82,9 +101,13 @@
       person1:
         age: 33
         employment_income: 30_000
+        weekly_hours_worked: 40
+        immigration_status: CITIZEN
       person2:
         age: 4
         is_tax_unit_dependent: true
+        immigration_status: CITIZEN
+        childcare_hours_per_week: 40
     spm_units:
       spm_unit:
         members: [person1, person2]
@@ -94,7 +117,7 @@
         state_code: NM
   output:
     # 2023-01 is in the all-copays-waived window (2022-05-01 to 2023-06-30,
-    # waived = true) -> $0.
+    # waived = true) -> $0, even though the family is above 200% FPG.
     nm_ccap_copay: 0
 
 - name: Case 5, copay is zero under Universal Child Care in 2026.
@@ -106,9 +129,13 @@
         age: 40
         # High income, but Universal Child Care waives all copays from 2025-11-01.
         employment_income: 200_000
+        weekly_hours_worked: 40
+        immigration_status: CITIZEN
       person2:
         age: 3
         is_tax_unit_dependent: true
+        immigration_status: CITIZEN
+        childcare_hours_per_week: 40
     spm_units:
       spm_unit:
         members: [person1, person2]
@@ -118,4 +145,120 @@
         state_code: NM
   output:
     # 2026 is under UCC (waived = true) -> $0.
+    nm_ccap_copay: 0
+
+- name: Case 6, family above the floor pays the scheduled copay.
+  period: 2025-01
+  absolute_error_margin: 0.01
+  input:
+    people:
+      person1:
+        age: 30
+        # 45_000/yr -> 3_750/month -> 213% FPG, inside the 200-250% band.
+        employment_income: 45_000
+        weekly_hours_worked: 40
+        immigration_status: CITIZEN
+      person2:
+        age: 3
+        is_tax_unit_dependent: true
+        immigration_status: CITIZEN
+        childcare_hours_per_week: 40
+    spm_units:
+      spm_unit:
+        members: [person1, person2]
+    households:
+      household:
+        members: [person1, person2]
+        state_code: NM
+  output:
+    # 3_750 x 0.02 = 75.00, below the 600/month family cap.
+    nm_ccap_copay: 75
+
+- name: Case 7, the family monthly cap binds for a two child family near the top of the scale.
+  period: 2025-01
+  absolute_error_margin: 0.01
+  input:
+    people:
+      person1:
+        age: 32
+        # 105_000/yr -> 8_750/month -> 394% FPG for a family of three, still
+        # under the operative 400% initial ceiling of 106_600/yr.
+        employment_income: 105_000
+        weekly_hours_worked: 40
+        immigration_status: CITIZEN
+      person2:
+        age: 3
+        is_tax_unit_dependent: true
+        immigration_status: CITIZEN
+        childcare_hours_per_week: 40
+      person3:
+        age: 7
+        is_tax_unit_dependent: true
+        immigration_status: CITIZEN
+        childcare_hours_per_week: 40
+    spm_units:
+      spm_unit:
+        members: [person1, person2, person3]
+    households:
+      household:
+        members: [person1, person2, person3]
+        state_code: NM
+  output:
+    # Schedule gives 8_750 x 0.06 x 1.5 = 787.50, capped at 600/month.
+    nm_ccap_copay: 600
+
+- name: Case 8, TANF enrolled family is exempt from the copayment.
+  period: 2025-01
+  absolute_error_margin: 0.01
+  input:
+    people:
+      person1:
+        age: 30
+        # 378% FPG would otherwise be charged 6% of monthly income.
+        employment_income: 80_000
+        weekly_hours_worked: 40
+        immigration_status: CITIZEN
+      person2:
+        age: 3
+        is_tax_unit_dependent: true
+        immigration_status: CITIZEN
+        childcare_hours_per_week: 40
+    spm_units:
+      spm_unit:
+        members: [person1, person2]
+        is_tanf_enrolled: true
+    households:
+      household:
+        members: [person1, person2]
+        state_code: NM
+  output:
+    # 8.15.2.9 Priority 1/2: TANF families are not charged a copayment.
+    nm_ccap_copay: 0
+
+- name: Case 9, a family that is not CCAP eligible is not charged a copayment.
+  period: 2025-01
+  absolute_error_margin: 0.01
+  input:
+    people:
+      person1:
+        age: 30
+        employment_income: 45_000
+        # No work hours and not a student -> fails the 8.15.2.11.I activity
+        # test, so the family is not CCAP eligible.
+        weekly_hours_worked: 0
+        immigration_status: CITIZEN
+      person2:
+        age: 3
+        is_tax_unit_dependent: true
+        immigration_status: CITIZEN
+        childcare_hours_per_week: 40
+    spm_units:
+      spm_unit:
+        members: [person1, person2]
+    households:
+      household:
+        members: [person1, person2]
+        state_code: NM
+  output:
+    nm_ccap_eligible: false
     nm_ccap_copay: 0

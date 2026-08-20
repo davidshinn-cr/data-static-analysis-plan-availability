@@ -1,0 +1,180 @@
+# NM CCAP copayment from the published schedule (8.15.2.24 NMAC), before the
+# per-family monthly cap and the TANF exemption, which nm_ccap_copay applies.
+#
+# Sliding scale on monthly countable income as a share of the guideline:
+#   at or below 200% FPG -> $0 (fpl_floor, inclusive)
+#   200%-250% -> 2%   250%-300% -> 3.5%   300%-350% -> 5%
+#   350%-400% -> 6%   400%+     -> 7%
+# Each additional child in care adds half the first child's amount.
+#
+# 2025 FPG (CONTIGUOUS_US): family of 2 = 21_150/yr (1_762.50/month),
+# family of 3 = 26_650/yr (2_220.83/month).
+
+- name: Case 1, family exactly at the 200 percent floor pays nothing.
+  period: 2025-01
+  absolute_error_margin: 0.01
+  input:
+    people:
+      person1:
+        age: 30
+        # 42_300/yr -> ratio exactly 2.0. The floor is inclusive, so the
+        # 2%-bracket rate is not applied here.
+        employment_income: 42_300
+        immigration_status: CITIZEN
+      person2:
+        age: 3
+        is_tax_unit_dependent: true
+        immigration_status: CITIZEN
+        childcare_hours_per_week: 40
+    spm_units:
+      spm_unit:
+        members: [person1, person2]
+    households:
+      household:
+        members: [person1, person2]
+        state_code: NM
+  output:
+    nm_ccap_scheduled_copay: 0
+
+- name: Case 2, family just above the floor pays two percent of monthly income.
+  period: 2025-01
+  absolute_error_margin: 0.01
+  input:
+    people:
+      person1:
+        age: 30
+        # 45_000/yr -> 3_750/month -> ratio 2.128, inside the 200-250% band.
+        employment_income: 45_000
+        immigration_status: CITIZEN
+      person2:
+        age: 3
+        is_tax_unit_dependent: true
+        immigration_status: CITIZEN
+        childcare_hours_per_week: 40
+    spm_units:
+      spm_unit:
+        members: [person1, person2]
+    households:
+      household:
+        members: [person1, person2]
+        state_code: NM
+  output:
+    # 3_750 x 0.02 = 75.00, one child in care.
+    nm_ccap_scheduled_copay: 75
+
+- name: Case 3, second child in care adds half the first child's copayment.
+  period: 2025-01
+  absolute_error_margin: 0.01
+  input:
+    people:
+      person1:
+        age: 32
+        # 84_000/yr -> 7_000/month -> ratio 3.152, inside the 300-350% band.
+        employment_income: 84_000
+        immigration_status: CITIZEN
+      person2:
+        age: 3
+        is_tax_unit_dependent: true
+        immigration_status: CITIZEN
+        childcare_hours_per_week: 40
+      person3:
+        age: 7
+        is_tax_unit_dependent: true
+        immigration_status: CITIZEN
+        childcare_hours_per_week: 40
+    spm_units:
+      spm_unit:
+        members: [person1, person2, person3]
+    households:
+      household:
+        members: [person1, person2, person3]
+        state_code: NM
+  output:
+    # 7_000 x 0.05 = 350.00 for the first child; +50% for the second = 525.00.
+    nm_ccap_scheduled_copay: 525
+
+- name: Case 4, schedule amount is returned uncapped at the top of the scale.
+  period: 2025-01
+  absolute_error_margin: 0.01
+  input:
+    people:
+      person1:
+        age: 32
+        # 105_000/yr -> 8_750/month -> ratio 3.940, inside the 350-400% band.
+        employment_income: 105_000
+        immigration_status: CITIZEN
+      person2:
+        age: 3
+        is_tax_unit_dependent: true
+        immigration_status: CITIZEN
+        childcare_hours_per_week: 40
+      person3:
+        age: 7
+        is_tax_unit_dependent: true
+        immigration_status: CITIZEN
+        childcare_hours_per_week: 40
+    spm_units:
+      spm_unit:
+        members: [person1, person2, person3]
+    households:
+      household:
+        members: [person1, person2, person3]
+        state_code: NM
+  output:
+    # 8_750 x 0.06 = 525.00; +50% for the second child = 787.50. The 600/month
+    # family cap is applied by nm_ccap_copay, not here.
+    nm_ccap_scheduled_copay: 787.5
+
+- name: Case 5, an age eligible child not in care is not charged for.
+  period: 2025-01
+  absolute_error_margin: 0.01
+  input:
+    people:
+      person1:
+        age: 32
+        employment_income: 84_000
+        immigration_status: CITIZEN
+      person2:
+        age: 3
+        is_tax_unit_dependent: true
+        immigration_status: CITIZEN
+        childcare_hours_per_week: 40
+      person3:
+        age: 7
+        is_tax_unit_dependent: true
+        immigration_status: CITIZEN
+        # No paid care for this child, so the family is charged for one child.
+        childcare_hours_per_week: 0
+    spm_units:
+      spm_unit:
+        members: [person1, person2, person3]
+    households:
+      household:
+        members: [person1, person2, person3]
+        state_code: NM
+  output:
+    nm_ccap_scheduled_copay: 350
+
+- name: Case 6, no child in care means no copayment.
+  period: 2025-01
+  absolute_error_margin: 0.01
+  input:
+    people:
+      person1:
+        age: 30
+        employment_income: 45_000
+        immigration_status: CITIZEN
+      person2:
+        age: 3
+        is_tax_unit_dependent: true
+        immigration_status: CITIZEN
+        childcare_hours_per_week: 0
+    spm_units:
+      spm_unit:
+        members: [person1, person2]
+    households:
+      household:
+        members: [person1, person2]
+        state_code: NM
+  output:
+    nm_ccap_scheduled_copay: 0

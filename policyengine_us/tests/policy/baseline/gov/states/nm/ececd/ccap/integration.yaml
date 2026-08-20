@@ -1,10 +1,13 @@
 # NM CCAP integration tests — full pipeline from eligibility through benefit.
 #
 # Subsidy per child = min(monthly provider rate, pre-subsidy monthly charge)
-# minus copay. Copayments are $0 for all modeled periods (fully waived
-# 2022-05-01 to 2023-06-30 and again from 2025-11-01; the >200% FPL copay
-# reinstated 2023-07-01 uses an unencoded schedule and is approximated as $0),
-# so the benefit is simply sum over children of min(rate, monthly charge).
+# minus copay. Copayments are $0 while the waiver is in force (2022-05-01 to
+# 2023-06-30 and again from 2025-11-01 under Universal Child Care) and for
+# families at or below 200% FPG. In the 2023-07-01 to 2025-10-31 reinstatement
+# window a family above 200% FPG pays the scheduled copay (8.15.2.24 NMAC,
+# encoded under copay/schedule/): a share of monthly countable income rising
+# from 2% to 7% across the scale, plus half that amount for each additional
+# child in care, capped at 600/month and waived entirely for TANF families.
 #
 # Rates effective 2023-08-01 (full-time monthly base), used for 2024-2025 cases:
 #   Center: 2-Star Infant 1_075, Toddler 775, Preschool 700, School Age 500; 5-Star Infant 1_925
@@ -143,8 +146,12 @@
     nm_ccap_eligible: true
     # Family Home 2-Star Preschool = 870 (full-time).
     nm_ccap_monthly_rate: [0, 870]
-    # Monthly charge = 9_600/12 = 800. Subsidy = min(870, 800) = 800.
-    nm_ccap: 800
+    # 45_000/yr is 3_750/month, 213% of the family-of-2 guideline, so the
+    # reinstated schedule charges 2% of monthly countable income for the one
+    # child in care: 3_750 x 0.02 = 75.
+    nm_ccap_copay: 75
+    # Monthly charge = 9_600/12 = 800. Subsidy = min(870, 800) - 75 = 725.
+    nm_ccap: 725
 
 # ============================================================
 # Case 4: TANF Priority 2 bypass — high income but TANF-enrolled.
@@ -492,7 +499,11 @@
     nm_ccap_eligible: true
     # Center 2-Star Infant = 1_075 (full-time). Monthly charge = 1_500.
     nm_ccap_monthly_rate: [0, 0, 1_075]
-    # Subsidy = min(1_075, 1_500) = 1_075; copay $0.
+    # 53_300/yr is exactly 200% of the family-of-3 guideline (26_650). The
+    # copayment floor is inclusive, so this family sits on the boundary and
+    # still pays nothing; a dollar more would fall in the 2% band.
+    nm_ccap_copay: 0
+    # Subsidy = min(1_075, 1_500) - 0 = 1_075.
     nm_ccap: 1_075
 
 # ============================================================
@@ -676,3 +687,104 @@
     nm_ccap_monthly_rate: [0, 750]
     # Monthly charge = 1_000 > 750. Subsidy = min(750, 1_000) - 0 = 750.
     nm_ccap: 750
+
+# ============================================================
+# Case 17: reinstatement window — a family above 200% FPG pays the scheduled
+# copay, which reduces the subsidy.
+# 2025 FPG family of 3 = 26_650/yr (2_220.83/month); operative 400% initial
+# ceiling = 106_600/yr.
+# ============================================================
+- name: Case 17, family above the copay floor has its subsidy reduced by the scheduled copay.
+  period: 2025-01
+  absolute_error_margin: 0.01
+  input:
+    people:
+      person1:
+        age: 32
+        # 84_000/yr -> 7_000/month -> 315% FPG, inside the 300-350% band.
+        employment_income: 84_000
+        weekly_hours_worked: 40
+        immigration_status: CITIZEN
+      person2:
+        age: 3  # 36 months -> PRESCHOOL
+        is_tax_unit_dependent: true
+        immigration_status: CITIZEN
+        childcare_hours_per_week: 40  # FULL_TIME
+        nm_ccap_provider_type: CENTER
+        nm_ccap_focus_level: TWO_STAR
+      person3:
+        age: 7  # 84 months -> SCHOOL_AGE
+        is_tax_unit_dependent: true
+        immigration_status: CITIZEN
+        childcare_hours_per_week: 40  # FULL_TIME
+        nm_ccap_provider_type: CENTER
+        nm_ccap_focus_level: TWO_STAR
+    spm_units:
+      spm_unit:
+        members: [person1, person2, person3]
+        nm_ccap_enrolled: false
+        spm_unit_assets: 5_000
+        # 30_000/yr -> 2_500/month, above the summed rates.
+        spm_unit_pre_subsidy_childcare_expenses: 30_000
+    households:
+      household:
+        members: [person1, person2, person3]
+        state_code: NM
+  output:
+    # 84_000 is below the operative 400% initial ceiling (106_600) -> eligible.
+    nm_ccap_income_eligible: true
+    nm_ccap_eligible: true
+    # Center 2-Star Preschool = 700; Center 2-Star School Age = 500.
+    nm_ccap_monthly_rate: [0, 700, 500]
+    # 7_000 x 0.05 = 350 for the first child; +50% for the second = 525.
+    nm_ccap_copay: 525
+    # max_reimbursement summed = 1_200; charge = 2_500.
+    # Subsidy = min(1_200, 2_500) - 525 = 675.
+    nm_ccap: 675
+
+# ============================================================
+# Case 18: reinstatement window — the 600/month family copayment cap binds.
+# ============================================================
+- name: Case 18, the family copayment cap limits how much the subsidy is reduced.
+  period: 2025-01
+  absolute_error_margin: 0.01
+  input:
+    people:
+      person1:
+        age: 32
+        # 105_000/yr -> 8_750/month -> 394% FPG, inside the 350-400% band and
+        # still under the operative 400% initial ceiling (106_600/yr).
+        employment_income: 105_000
+        weekly_hours_worked: 40
+        immigration_status: CITIZEN
+      person2:
+        age: 3  # 36 months -> PRESCHOOL
+        is_tax_unit_dependent: true
+        immigration_status: CITIZEN
+        childcare_hours_per_week: 40  # FULL_TIME
+        nm_ccap_provider_type: CENTER
+        nm_ccap_focus_level: TWO_STAR
+      person3:
+        age: 7  # 84 months -> SCHOOL_AGE
+        is_tax_unit_dependent: true
+        immigration_status: CITIZEN
+        childcare_hours_per_week: 40  # FULL_TIME
+        nm_ccap_provider_type: CENTER
+        nm_ccap_focus_level: TWO_STAR
+    spm_units:
+      spm_unit:
+        members: [person1, person2, person3]
+        nm_ccap_enrolled: false
+        spm_unit_assets: 5_000
+        spm_unit_pre_subsidy_childcare_expenses: 30_000
+    households:
+      household:
+        members: [person1, person2, person3]
+        state_code: NM
+  output:
+    nm_ccap_eligible: true
+    nm_ccap_monthly_rate: [0, 700, 500]
+    # Schedule gives 8_750 x 0.06 x 1.5 = 787.50, capped at 600/month.
+    nm_ccap_copay: 600
+    # Subsidy = min(1_200, 2_500) - 600 = 600.
+    nm_ccap: 600

@@ -1,0 +1,117 @@
+# NM CCAP countable income as a share of the federal poverty guideline.
+# Both sides are monthly. 2025 FPG (CONTIGUOUS_US): family of 2 = 21_150/yr
+# (1_762.50/month), family of 3 = 26_650/yr (2_220.83/month).
+# Only caretaker (tax unit head/spouse) income counts — 8.15.2.11.C(3).
+
+- name: Case 1, family of two at exactly 200 percent of the guideline.
+  period: 2025-01
+  absolute_error_margin: 0.0001
+  input:
+    people:
+      person1:
+        age: 30
+        # 42_300/yr = 3_525/month = 2 x 1_762.50.
+        employment_income: 42_300
+      person2:
+        age: 3
+        is_tax_unit_dependent: true
+    spm_units:
+      spm_unit:
+        members: [person1, person2]
+    households:
+      household:
+        members: [person1, person2]
+        state_code: NM
+  output:
+    nm_ccap_income_to_fpg_ratio: 2
+
+- name: Case 2, family of two at exactly 300 percent of the guideline.
+  period: 2025-01
+  absolute_error_margin: 0.0001
+  input:
+    people:
+      person1:
+        age: 30
+        # 63_450/yr = 5_287.50/month = 3 x 1_762.50.
+        employment_income: 63_450
+      person2:
+        age: 3
+        is_tax_unit_dependent: true
+    spm_units:
+      spm_unit:
+        members: [person1, person2]
+    households:
+      household:
+        members: [person1, person2]
+        state_code: NM
+  output:
+    nm_ccap_income_to_fpg_ratio: 3
+
+- name: Case 3, family of three at exactly 200 percent of the guideline.
+  period: 2025-01
+  absolute_error_margin: 0.0001
+  input:
+    people:
+      person1:
+        age: 32
+        # 53_300/yr = 4_441.67/month = 2 x 2_220.83.
+        employment_income: 53_300
+      person2:
+        age: 30
+      person3:
+        age: 1
+        is_tax_unit_dependent: true
+    spm_units:
+      spm_unit:
+        members: [person1, person2, person3]
+    households:
+      household:
+        members: [person1, person2, person3]
+        state_code: NM
+  output:
+    nm_ccap_income_to_fpg_ratio: 2
+
+- name: Case 4, a child's earnings do not raise the ratio.
+  period: 2025-01
+  absolute_error_margin: 0.0001
+  input:
+    people:
+      person1:
+        age: 30
+        employment_income: 42_300
+      person2:
+        age: 12
+        is_tax_unit_dependent: true
+        # 8.15.2.11.C(3) excludes the income of legal dependents, so this is
+        # not counted and the ratio stays at 200 percent.
+        employment_income: 6_000
+    spm_units:
+      spm_unit:
+        members: [person1, person2]
+    households:
+      household:
+        members: [person1, person2]
+        state_code: NM
+  output:
+    nm_ccap_income_to_fpg_ratio: 2
+
+- name: Case 5, a business loss produces a negative ratio, below the copay floor.
+  period: 2025-01
+  absolute_error_margin: 0.0001
+  input:
+    people:
+      person1:
+        age: 30
+        self_employment_income: -21_150
+      person2:
+        age: 3
+        is_tax_unit_dependent: true
+    spm_units:
+      spm_unit:
+        members: [person1, person2]
+    households:
+      household:
+        members: [person1, person2]
+        state_code: NM
+  output:
+    nm_ccap_income_to_fpg_ratio: -1

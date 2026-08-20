@@ -51,3 +51,43 @@
     state_code: MO
   output:
     is_older_child_for_medicaid: false
+
+# New Mexico raises the older-child ceiling from 245% to 255% FPG effective
+# 2026-01-01, aligning it with the state's pregnant-woman ceiling (255%).
+- name: NM older child at 246% FPL in 2025, above the pre-2026 ceiling, ineligible
+  period: 2025
+  input:
+    age: 8
+    medicaid_income_level: 2.46
+    state_code: NM
+  output:
+    is_older_child_for_medicaid: false
+
+- name: NM older child at 246% FPL in 2026, inside the newly covered band, eligible
+  period: 2026
+  input:
+    age: 8
+    medicaid_income_level: 2.46
+    state_code: NM
+  output:
+    is_older_child_for_medicaid: true
+
+# As with the MO cases above, the float32-stored input 2.55 (~2.54999995) lands
+# just below the float64 parameter 2.55, so the exact boundary is eligible.
+- name: NM older child at exactly 255% FPL in 2026, the new income maximum, eligible
+  period: 2026
+  input:
+    age: 8
+    medicaid_income_level: 2.55
+    state_code: NM
+  output:
+    is_older_child_for_medicaid: true
+
+- name: NM older child at 256% FPL in 2026, above the new ceiling, ineligible
+  period: 2026
+  input:
+    age: 8
+    medicaid_income_level: 2.56
+    state_code: NM
+  output:
+    is_older_child_for_medicaid: false
